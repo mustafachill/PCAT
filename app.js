@@ -38,6 +38,11 @@ app.get('/about', (req, res) => {
 app.get('/add', (req, res) => {
   res.render('add');
 });
+app.get('/photos/edit/:id', (req, res) => {
+  const photo = Photo.findOne({_id: req.params.id})
+  res.render('edit');
+});
+//POST
 app.post('/photos', async (req, res) => {
   const uploadDir = 'public/uploads';
   if(!fs.existsSync(uploadDir)){
