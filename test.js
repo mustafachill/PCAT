@@ -27,3 +27,20 @@ Photo.find({})
   .catch((err) => {
     console.error('Hata:', err); // Hata durumunda hatayı konsola yazdır
   });
+
+//find a photo by id and update
+async function updatePhotoById(photo_id) {
+  try {
+    const updatedPhoto = await Photo.findByIdAndUpdate(photo_id, {
+      title: "Photo update title 1",
+      description: "blablabla"
+    }, { new: true });  // Güncellenmiş dokümanı döndürmek için { new: true } kullanılır
+
+    console.log("Güncellenen Fotoğraf:", updatedPhoto);
+  } catch (err) {
+    console.error('Hata:', err);
+  }
+}
+
+const photo_id = '66c490658de3af7fdbbe8100';
+updatePhotoById(photo_id);
