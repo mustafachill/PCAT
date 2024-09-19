@@ -1,10 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const fileUpload = require('express-fileupload');
+const methodOverride = require('method-override');
 const path = require('path');
 const ejs = require('ejs');
 const fs = require('fs');
 const Photo = require('./models/Photo');
+const photoController = require("./controllers/photoControllers")
+const pageController = require("./controllers/pageControllers")
+
 
 const app = express();
 
@@ -18,48 +22,35 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(fileUpload());
+app.use(
+  methodOverride('_method', {
+    methods: ['POST', 'GET'],
+  })
+);
 
-//ROUTES
-app.get('/', async (req, res) => {
-  const photos = await Photo.find({}).sort('-dateCreated');
-  res.render('index', {
-    photos,
-  });
-});
-app.get('/photos/:id', async (req, res) => {
-  const photo = await Photo.findById(req.params.id);
-  res.render('photo', {
-    photo,
-  });
-});
-app.get('/about', (req, res) => {
-  res.render('about');
-});
-app.get('/add', (req, res) => {
-  res.render('add');
-});
-app.get('/photos/edit/:id', (req, res) => {
-  const photo = Photo.findOne({_id: req.params.id})
-  res.render('edit');
-});
-//POST
-app.post('/photos', async (req, res) => {
-  const uploadDir = 'public/uploads';
-  if(!fs.existsSync(uploadDir)){
-    fs.mkdirSync(uploadDir)
-  }
-  let uploadImage = req.files.image;
-  let uploadPath = __dirname + '/public/uploads/' + uploadImage.name;
+////////////////////
+//////ROUTES////////
+////////////////////
 
-  uploadImage.mv(uploadPath, async () => {
-    await Photo.create({
-      ...req.body,
-      image: '/uploads/' + uploadImage.name,
-    });
-    res.redirect('/');
-  });
-});
+// GET ALL PHOTOS
+app.get('/', photoController.getAllPhotos);
+// PHOTO DESCRIPTON
+app.get('/photos/:id', photoController.getPhoto);
+// POST AND SAVE
+app.post('/photos', photoController.createPhoto);
+// UPDATE PHOTO INFO
+app.put('/photos/:id', photoController.updatePhoto);
+// DELETE PHOTO
+app.delete('/photos/:id', photoController.deletePhoto);
 
+// ABOUT PAGE
+app.get('/about', pageController.getAboutPage);
+// ADD PHOTO PAGE
+app.get('/add', pageController.getAddPage);
+// EDIT PHOTO PAGE
+app.get('/photos/edit/:id', pageController.getEditPage);
+
+// PORT
 const port = 3000;
 app.listen(port, () => {
   console.log(`Sunucu ${port} başlatıldı...`);
